@@ -58,6 +58,7 @@ public class CharacterMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            Debug.Log("Skok");
             state = 5; // jump
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
@@ -66,12 +67,16 @@ public class CharacterMovement : MonoBehaviour
         rb.AddForce(moveDirection * accel * Time.deltaTime);
 
         Vector3 vel = rb.linearVelocity;
-        if (vel.magnitude > currentMaxSpeed)
+        Vector3 horizontalVel = new Vector3(vel.x, 0, vel.z);
+
+        if (horizontalVel.magnitude > currentMaxSpeed)
         {
-            rb.linearVelocity = vel.normalized * currentMaxSpeed;
+            horizontalVel = horizontalVel.normalized * currentMaxSpeed;
+            rb.linearVelocity = new Vector3(horizontalVel.x, vel.y, horizontalVel.z);
         }
 
         // Set state
         anim.SetInteger("State", state);
     }
+
 }
