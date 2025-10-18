@@ -5,100 +5,73 @@ using UnityEngine;
 public class CharacterMovement : MonoBehaviour
 {
     public Rigidbody rb;
+    public Animator anim;
+
     public float accel = 400.0f;
-    public float maxSpeedWalk = 2.0f;
-    public float maxSpeedRun = 5.0f;
+    public float maxWalkSpeed = 2.0f;
+    public float maxRunSpeed = 4.0f;
     public float rotateSpeed = 2.0f;
     public float jumpForce = 5.0f;
 
-    public Animator anim;
+    private Vector3 moveDirection = Vector3.zero;
 
-    private bool isGrounded = true;
-    private int state = 0;
-
+    // Update is called once per frame
     void FixedUpdate()
     {
-        Vector3 moveInput = Vector3.zero;
+        float vertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxis("Horizontal");
 
-        // --- Ruch do przodu i tyłu ---
-        if (Input.GetKey(KeyCode.W))
-            moveInput.z += 1;
-        if (Input.GetKey(KeyCode.S))
-            moveInput.z -= 1;
+        // Rotate player
+        transform.Rotate(0, horizontal * rotateSpeed, 0);
 
-        // --- Obrót ---
-        float turn = 0;
-        if (Input.GetKey(KeyCode.A))
-            turn = -1;
-        if (Input.GetKey(KeyCode.D))
-            turn = 1;
+        // Move forward/backward
+        moveDirection = new Vector3(0, 0, vertical);
+        moveDirection = transform.TransformDirection(moveDirection);
 
-        transform.Rotate(0, turn * rotateSpeed, 0);
+        float currentMaxSpeed = maxWalkSpeed;
+        int state = 0;
 
-        // --- Przemiana lokalnego ruchu na globalny ---
-        Vector3 moveDir = transform.TransformDirection(moveInput.normalized);
-        float speed = Input.GetKey(KeyCode.LeftShift) ? maxSpeedRun : maxSpeedWalk;
-
-        rb.AddForce(moveDir * accel * Time.deltaTime);
-
-        // --- Ograniczenie prędkości ---
-        Vector3 vel = rb.linearVelocity;
-        Vector3 flatVel = new Vector3(vel.x, 0, vel.z);
-
-        if (flatVel.magnitude > speed)
+        if (vertical > 0)
         {
-            flatVel = flatVel.normalized * speed;
-            rb.linearVelocity = new Vector3(flatVel.x, vel.y, flatVel.z);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                state = 2; // run forward
+                currentMaxSpeed = maxRunSpeed;
+            }
+            else
+            {
+                state = 1; // walk forward
+            }
+        }
+        else if (vertical < 0)
+        {
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                state = 4; // run backward
+                currentMaxSpeed = maxRunSpeed;
+            }
+            else
+            {
+                state = 3; // walk backward
+            }
         }
 
-        // --- Skakanie ---
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isGrounded = false;
-            state = 5; // jump-up
-            anim.SetInteger("State", state);
-            return; // Przerywamy, by nie nadpisać animacji skoku
-        }
-
-        // --- Stan animacji ---
-        float horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z).magnitude;
-
-        if (!isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             state = 5; // jump
-        }
-        else if (horizontalVel < 0.1f)
-        {
-            state = 0; // idle
-        }
-        else
-        {
-            bool isRunning = Input.GetKey(KeyCode.LeftShift);
-
-            if (Input.GetKey(KeyCode.W))
-                state = isRunning ? 2 : 1; // run or walk
-            else if (Input.GetKey(KeyCode.S))
-                state = isRunning ? 4 : 3; // backward run or walk
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
+        // Ruch fizyczny
+        rb.AddForce(moveDirection * accel * Time.deltaTime);
+
+        Vector3 vel = rb.linearVelocity;
+        if (vel.magnitude > currentMaxSpeed)
+        {
+            rb.linearVelocity = vel.normalized * currentMaxSpeed;
+        }
+
+        // Set state
         anim.SetInteger("State", state);
-    }
-
-    // Wykrywanie kontaktu z podłożem
-    private void OnCollisionStay(Collision collision)
-    {
-        // Sprawdź, czy dotykamy podłoża (tag, warstwa lub cokolwiek logicznego)
-        if (collision.contacts.Length > 0)
-        {
-            ContactPoint contact = collision.contacts[0];
-            if (Vector3.Dot(contact.normal, Vector3.up) > 0.5f)
-                isGrounded = true;
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        isGrounded = false;
     }
 }
