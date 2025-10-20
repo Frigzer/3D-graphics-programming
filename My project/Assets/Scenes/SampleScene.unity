@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 7ad0a3fe303e59c4a9ba52dcf872a4d2, type: 2}
   m_HaloStrength: 0.5
@@ -530,7 +530,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 11
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
@@ -1407,8 +1407,8 @@ MonoBehaviour:
   accel: 400
   maxWalkSpeed: 2
   maxRunSpeed: 4
-  rotateSpeed: 2
-  jumpForce: 5
+  rotateSpeed: 1
+  jumpForce: 4
 --- !u!54 &1691816514
 Rigidbody:
   m_ObjectHideFlags: 0
