@@ -10,13 +10,13 @@ public class CharacterMovement : MonoBehaviour
     public float accel = 400.0f;
     public float maxWalkSpeed = 2.0f;
     public float maxRunSpeed = 4.0f;
-    public float rotateSpeed = 2.0f;
-    public float jumpForce = 5.0f;
+    public float rotateSpeed = 1.0f;
+    public float jumpForce = 4.0f;
 
     private Vector3 moveDirection = Vector3.zero;
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         float vertical = Input.GetAxis("Vertical");
         float horizontal = Input.GetAxis("Horizontal");
@@ -54,7 +54,7 @@ public class CharacterMovement : MonoBehaviour
             {
                 state = 3; // walk backward
             }
-        }
+        } 
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -63,7 +63,7 @@ public class CharacterMovement : MonoBehaviour
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
-        // Ruch fizyczny
+        // Physical movement
         rb.AddForce(moveDirection * accel * Time.deltaTime);
 
         Vector3 vel = rb.linearVelocity;
